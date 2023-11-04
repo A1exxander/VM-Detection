@@ -50,9 +50,8 @@
 	bool VMDetect::isVM() {
 
 		if (VMDetect::invalidTSC() && VMDetect::cpu_known_vm_vendors()) {
-
 			return true;
-
 		}
-
+		return false;
+		
 	}
