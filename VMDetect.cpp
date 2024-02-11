@@ -11,14 +11,15 @@
 
 	}
 
-	bool VMDetect::cpu_known_vm_vendors() {
+	bool VMDetect::isVirtualizedCPU() {
 
 		int cpuInfo[4];
 		__cpuid(cpuInfo, 1);
 
-		if (!(cpuInfo[2] & (1 << 31)))
+		if (!(cpuInfo[2] & (1 << 31))) {
 			return false;
-
+		}
+		
 		const auto queryVendorIdMagic{ 0x40000000 };
 		constexpr int vendorIdLength{ 13 };
 		char hyperVendorId[vendorIdLength];
@@ -29,7 +30,7 @@
 		memcpy(hyperVendorId + 8, &cpuInfo[3], 4);
 		hyperVendorId[12] = '\0';
 
-		static const char* vendors[]{
+		static const char* vendors[] {
 		"KVMKVMKVM\0\0\0", // KVM 
 		"Microsoft Hv",    // Microsoft Hyper-V or Windows Virtual PC */
 		"VMwareVMware",    // VMware 
@@ -38,20 +39,14 @@
 		"VBoxVBoxVBox"     // VirtualBox 
 		};
 
-		for (const auto& vendor : vendors)
-		{
-			if (!memcmp(vendor, hyperVendorId, vendorIdLength))
+		for (const auto& vendor : vendors) {
+			if (!memcmp(vendor, hyperVendorId, vendorIdLength)) {
 				return true;
+			}
 		}
 
-		return false;
-	}
-
-	bool VMDetect::isVM() {
-
-		if (VMDetect::invalidTSC() && VMDetect::cpu_known_vm_vendors()) {
-			return true;
-		}
 		return false;
 		
 	}
+
+	bool VMDetect::isVM() { return (VMDetect::invalidTSC() && VMDetect::isVirtualizedCPU()) }
